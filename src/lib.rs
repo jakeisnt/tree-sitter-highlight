@@ -10,7 +10,9 @@ pub enum Language {
   JSX,
   TS,
   TSX,
-  CSS
+  CSS,
+  SCSS,
+  JSON,
 }
 
 lazy_static! {
@@ -93,6 +95,38 @@ lazy_static! {
     let (html_attrs, class_names) = get_attrs(&highlight_names);
     (config, html_attrs, class_names, HashMap::new())
   };
+
+  static ref SCSS_CONFIG: (HighlightConfiguration, Vec<String>, Vec<String>, HashMap<&'static str, HighlightConfiguration>) = {
+    let mut config = HighlightConfiguration::new(
+      tree_sitter_scss::language(),
+      tree_sitter_scss::HIGHLIGHTS_QUERY,
+      "",
+      "",
+    ).unwrap();
+
+    let mut highlight_names = Vec::new();
+    add_highlight_names(&config, &mut highlight_names);
+    config.configure(&highlight_names);
+
+    let (html_attrs, class_names) = get_attrs(&highlight_names);
+    (config, html_attrs, class_names, HashMap::new())
+  };
+
+  static ref JSON_CONFIG: (HighlightConfiguration, Vec<String>, Vec<String>, HashMap<&'static str, HighlightConfiguration>) = {
+    let mut config = HighlightConfiguration::new(
+      tree_sitter_json::language(),
+      tree_sitter_json::HIGHLIGHTS_QUERY,
+      "",
+      "",
+    ).unwrap();
+
+    let mut highlight_names = Vec::new();
+    add_highlight_names(&config, &mut highlight_names);
+    config.configure(&highlight_names);
+
+    let (html_attrs, class_names) = get_attrs(&highlight_names);
+    (config, html_attrs, class_names, HashMap::new())
+  };
 }
 
 fn add_highlight_names(config: &HighlightConfiguration, highlight_names: &mut Vec<String>) {
@@ -144,7 +178,9 @@ fn load_language<'a>(language: Language) -> (&'a HighlightConfiguration, &'a Vec
     Language::JSX => &*JSX_CONFIG,
     Language::TS => &*TS_CONFIG,
     Language::TSX => &*TSX_CONFIG,
-    Language::CSS => &*CSS_CONFIG
+    Language::CSS => &*CSS_CONFIG,
+    LANGUAGE::SCSS => &*SCSS_CONFIG,
+    LANGUAGE::JSON => &*JSON_CONFIG,
   };
 
   (&config, &html_attrs, &class_names, &injections)
